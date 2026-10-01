@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingVertical="10dp">
+
+    <ImageView
+        android:id="@+id/iv_ingredient_status"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:contentDescription="@string/cd_ingredient_available"
+        tools:src="@drawable/ic_check" />
+
+    <TextView
+        android:id="@+id/tv_ingredient_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/spacing_medium"
+        android:layout_weight="1"
+        android:textColor="@color/text_primary"
+        android:textSize="16sp"
+        tools:text="Eggs" />
+
+    <TextView
+        android:id="@+id/tv_ingredient_amount"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@style/TextAppearance.Pantry.Caption"
+        tools:text="3 pcs" />
+</LinearLayout>

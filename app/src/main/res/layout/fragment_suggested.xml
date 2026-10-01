@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/layout_recipes_content"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/tv_match_summary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/primary_light"
+            android:padding="@dimen/spacing_medium"
+            android:textAppearance="@style/TextAppearance.Pantry.Title"
+            android:visibility="gone" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/recycler_recipes"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingTop="@dimen/spacing_small"
+            android:paddingBottom="@dimen/spacing_medium" />
+    </LinearLayout>
+
+    <ProgressBar
+        android:id="@+id/progress_recipes"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <!-- Empty state: shown when zero recipes strictly match the pantry -->
+    <LinearLayout
+        android:id="@+id/layout_empty_recipes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_large"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:text="@string/empty_recipes_title"
+            android:textAppearance="@style/TextAppearance.Pantry.Title"
+            android:textSize="18sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:gravity="center"
+            android:text="@string/empty_recipes_hint"
+            android:textAppearance="@style/TextAppearance.Pantry.Caption" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_go_to_pantry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_medium"
+            android:text="@string/action_go_to_pantry" />
+    </LinearLayout>
+
+    <!-- Error state (wired up in Segment 10) -->
+    <LinearLayout
+        android:id="@+id/layout_error_recipes"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:padding="@dimen/spacing_large"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/error_generic_title"
+            android:textAppearance="@style/TextAppearance.Pantry.Title"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/tv_error_recipes_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_small"
+            android:gravity="center"
+            android:text="@string/error_generic_hint"
+            android:textAppearance="@style/TextAppearance.Pantry.Caption" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_retry_recipes"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="@dimen/spacing_medium"
+            android:text="@string/action_retry" />
+    </LinearLayout>
+</FrameLayout>

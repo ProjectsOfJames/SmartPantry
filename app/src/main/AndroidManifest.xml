@@ -26,6 +26,15 @@
             android:name=".Add_edit_ingredient"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".recipe_detail"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+        <activity
+            android:name=".settings"
+            android:exported="false"
+            android:theme="@style/Theme.SmartPantry"
+            android:windowSoftInputMode="adjustResize" />
     </application>
 
 </manifest>

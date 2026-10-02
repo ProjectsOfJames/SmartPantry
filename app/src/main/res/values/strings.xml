@@ -23,6 +23,9 @@
     <string name="error_generic_title">Something went wrong</string>
     <string name="error_generic_hint">Check that the server is running and try again.</string>
     <string name="action_retry">Retry</string>
+    <string name="error_name_invalid">Name must contain at least one letter</string>
+    <string name="error_quantity_not_number">Enter a valid number, for example 2 or 0.5</string>
+    <string name="error_quantity_too_large">Quantity is too large</string>
 
     <!-- Add / Edit form -->
     <string name="hint_name">Ingredient name</string>
@@ -63,6 +66,7 @@
     <!-- Ingredient Actions -->
     <string name="item_deleted">%1$s removed</string>
     <string name="action_undo">Undo</string>
+    <string name="item_saved">%1$s saved</string>
 
     <!-- Settings -->
     <string name="settings_alerts_header">Notifications</string>

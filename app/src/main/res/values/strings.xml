@@ -60,6 +60,10 @@
     <string name="cd_ingredient_available">In your pantry</string>
     <string name="cd_ingredient_missing">Not in your pantry</string>
 
+    <!-- Ingredient Actions -->
+    <string name="item_deleted">%1$s removed</string>
+    <string name="action_undo">Undo</string>
+
     <!-- Settings -->
     <string name="settings_alerts_header">Notifications</string>
     <string name="settings_expiry_alerts">Expiring-soon alerts</string>

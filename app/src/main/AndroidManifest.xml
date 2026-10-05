@@ -31,8 +31,14 @@
             android:parentActivityName=".MainActivity" />
 
         <activity
+            android:name=".Recipe_Detail_Activity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
+        <activity
             android:name=".Settings_Activity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
+
     </application>
 </manifest>

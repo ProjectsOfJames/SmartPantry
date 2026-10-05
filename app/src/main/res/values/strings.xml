@@ -26,6 +26,7 @@
     <string name="error_name_invalid">Name must contain at least one letter</string>
     <string name="error_quantity_not_number">Enter a valid number, for example 2 or 0.5</string>
     <string name="error_quantity_too_large">Quantity is too large</string>
+    <string name="error_recipe_missing">Recipe could not be opened</string>
 
     <!-- Add / Edit form -->
     <string name="hint_name">Ingredient name</string>

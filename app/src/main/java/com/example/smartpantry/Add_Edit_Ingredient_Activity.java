@@ -20,6 +20,7 @@ import com.example.smartpantry.data.ResultCallback;
 import com.example.smartpantry.model.PantryItem;
 import com.example.smartpantry.util.FormatUtils;
 import com.example.smartpantry.util.IntentKeys;
+import com.example.smartpantry.util.SettingsManager;
 import com.google.android.material.button.MaterialButton;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
@@ -135,8 +136,9 @@ public class Add_Edit_Ingredient_Activity extends AppCompatActivity {
         }
     }
 
+    /** The unit type chosen in Settings decides which unit is pre-selected. */
     private int defaultUnitPosition() {
-        return 0;
+        return indexOfUnit(new SettingsManager(this).getDefaultUnit());
     }
 
     private int indexOfUnit(String unit) {

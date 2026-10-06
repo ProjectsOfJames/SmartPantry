@@ -10,6 +10,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
 
+import com.example.smartpantry.alerts.ExpiryScheduler;
 import com.example.smartpantry.ui.PantryFragment;
 import com.example.smartpantry.ui.SuggestedRecipesFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
@@ -30,6 +31,9 @@ public class MainActivity extends AppCompatActivity {
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+        // Make the background expiry job match the saved Settings choice
+        ExpiryScheduler.sync(getApplicationContext());
 
         bottomNav = findViewById(R.id.bottom_nav);
         bottomNav.setOnItemSelectedListener(item -> {

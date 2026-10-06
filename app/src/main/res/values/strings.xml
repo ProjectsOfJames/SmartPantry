@@ -78,4 +78,24 @@
     <string name="settings_units_desc">Default unit type in the Add Ingredient form</string>
     <string name="units_metric">Metric (g, kg, ml, l)</string>
     <string name="units_kitchen">Kitchen (tsp, tbsp, cup)</string>
+
+    <!-- Ingredient Expiration -->
+    <string name="settings_check_now">Check expiring items now</string>
+    <string name="toast_no_expiring">Nothing expires within %1$d day(s)</string>
+    <string name="toast_permission_denied">Notification permission is needed for expiry alerts</string>
+    <string name="toast_notifications_blocked">Notifications are blocked for this app in system settings</string>
+
+    <string name="notif_channel_name">Expiry alerts</string>
+    <string name="notif_channel_desc">Reminders about pantry items that are about to expire</string>
+    <plurals name="notif_title">
+        <item quantity="one">%d item expiring soon</item>
+        <item quantity="other">%d items expiring soon</item>
+    </plurals>
+    <string name="notif_more">+%1$d more</string>
+    <string name="notif_item_line">%1$s (%2$s)</string>
+    <string name="expiry_status_expired">expired</string>
+    <string name="expiry_status_today">expires today</string>
+    <string name="expiry_status_tomorrow">expires tomorrow</string>
+    <string name="expiry_status_days">expires in %1$d days</string>
+
 </resources>

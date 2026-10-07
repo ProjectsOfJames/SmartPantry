@@ -27,6 +27,7 @@
 
         <activity
             android:name=".Add_Edit_Ingredient_Activity"
+            android:configChanges="orientation|screenSize|screenLayout|keyboardHidden"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 

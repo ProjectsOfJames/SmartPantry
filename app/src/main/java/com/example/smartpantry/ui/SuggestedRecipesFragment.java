@@ -32,6 +32,9 @@ public class SuggestedRecipesFragment extends Fragment implements RecipeAdapter.
 
     private final Repository repository = RepositoryImpl.getInstance();
 
+    /** Only the response to the latest load is used; older ones are ignored. */
+    private int loadGeneration;
+
     private RecipeAdapter adapter;
     private View content;
     private TextView summary;
@@ -75,45 +78,59 @@ public class SuggestedRecipesFragment extends Fragment implements RecipeAdapter.
         loadData();
     }
 
+    /** Release view references so a destroyed screen can be garbage collected. */
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        adapter = null;
+        content = null;
+        summary = null;
+        progress = null;
+        emptyLayout = null;
+        errorLayout = null;
+        errorMessage = null;
+    }
+
     // loading
 
     /** Step 1 of 2: read the pantry. */
     private void loadData() {
+        final int generation = ++loadGeneration;
         showLoading();
         repository.getPantryItems(new ResultCallback<List<PantryItem>>() {
             @Override
             public void onSuccess(List<PantryItem> pantry) {
-                if (!isViewAlive()) return;
-                loadRecipes(pantry);
+                if (!isViewAlive() || generation != loadGeneration) return;
+                loadRecipes(pantry, generation);
             }
 
             @Override
             public void onError(String message) {
-                if (!isViewAlive()) return;
+                if (!isViewAlive() || generation != loadGeneration) return;
                 showError(message);
             }
         });
     }
 
     /** Step 2 of 2: read the recipes, then match them against the pantry. */
-    private void loadRecipes(List<PantryItem> pantry) {
+    private void loadRecipes(List<PantryItem> pantry, int generation) {
         repository.getRecipes(new ResultCallback<List<Recipe>>() {
             @Override
             public void onSuccess(List<Recipe> recipes) {
-                if (!isViewAlive()) return;
+                if (!isViewAlive() || generation != loadGeneration) return;
                 showMatches(RecipeMatcher.findMatches(recipes, pantry));
             }
 
             @Override
             public void onError(String message) {
-                if (!isViewAlive()) return;
+                if (!isViewAlive() || generation != loadGeneration) return;
                 showError(message);
             }
         });
     }
 
     private boolean isViewAlive() {
-        return isAdded() && getView() != null;
+        return isAdded() && getView() != null && content != null;
     }
 
     // screen state
@@ -137,7 +154,8 @@ public class SuggestedRecipesFragment extends Fragment implements RecipeAdapter.
 
         emptyLayout.setVisibility(View.GONE);
         content.setVisibility(View.VISIBLE);
-        summary.setText(getString(R.string.recipes_match_summary, matches.size()));
+        summary.setText(getResources().getQuantityString(
+                R.plurals.recipes_match_plural, matches.size(), matches.size()));
         summary.setVisibility(View.VISIBLE);
         adapter.submitList(matches);
     }

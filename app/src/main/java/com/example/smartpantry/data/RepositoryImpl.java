@@ -6,6 +6,9 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.IOException;
+import java.net.ConnectException;
+import java.net.SocketTimeoutException;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -43,7 +46,7 @@ public class RepositoryImpl implements Repository {
         R map(T body) throws Exception;
     }
 
-    // ---------------------------------------------------------------- pantry
+    // Pantry
 
     @Override
     public void getPantryItems(ResultCallback<List<PantryItem>> callback) {
@@ -71,7 +74,7 @@ public class RepositoryImpl implements Repository {
         run(api.deletePantryItem("eq." + id), body -> null, callback);
     }
 
-    // --------------------------------------------------------------- recipes
+    // Recipes
 
     @Override
     public void getRecipes(ResultCallback<List<Recipe>> callback) {
@@ -87,7 +90,7 @@ public class RepositoryImpl implements Repository {
                 callback);
     }
 
-    // --------------------------------------------------------------- helpers
+    // Helpers
 
     /** Runs a call asynchronously and reports the mapped result or an error message. */
     private <T, R> void run(Call<T> call, Mapper<T, R> mapper, ResultCallback<R> callback) {
@@ -137,14 +140,38 @@ public class RepositoryImpl implements Repository {
         } catch (Exception ignored) {
             // body was not JSON: fall back to the status code alone
         }
-        String base = "Server error (" + response.code() + ")";
+
+        int code = response.code();
+        String base;
+        if (code == 400 || code == 422) {
+            base = "The server rejected that data";
+        } else if (code == 401 || code == 403) {
+            base = "The app is not allowed to do that";
+        } else if (code == 404) {
+            base = "The server could not find what was requested";
+        } else if (code == 409) {
+            base = "That conflicts with existing data";
+        } else if (code >= 500) {
+            base = "The server had a problem (" + code + ")";
+        } else {
+            base = "Server error (" + code + ")";
+        }
         return detail != null ? base + ": " + detail : base;
     }
 
     /** Network-level failures: no connection, timeout, server down. */
     private static String describeFailure(Throwable t) {
-        if (t instanceof IOException) {
+        if (t instanceof SocketTimeoutException) {
+            return "The server did not respond in time. Make sure Docker and PostgREST are running, then retry.";
+        }
+        if (t instanceof UnknownHostException) {
+            return "Cannot find the server. Check the address in ApiClient.";
+        }
+        if (t instanceof ConnectException) {
             return "Cannot reach the server. Make sure Docker and PostgREST are running.";
+        }
+        if (t instanceof IOException) {
+            return "Network problem. Check your connection and try again.";
         }
         return t.getMessage() != null ? t.getMessage() : "Unexpected error.";
     }

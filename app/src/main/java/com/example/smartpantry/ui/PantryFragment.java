@@ -25,15 +25,19 @@ import com.example.smartpantry.data.RepositoryImpl;
 import com.example.smartpantry.data.ResultCallback;
 import com.example.smartpantry.model.PantryItem;
 import com.example.smartpantry.util.IntentKeys;
+import com.example.smartpantry.util.SettingsManager;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.android.material.snackbar.Snackbar;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 /**
  * The Pantry List screen: shows every ingredient, lets the user add (FAB),
- * edit (tap a row) and delete (swipe a row or tap its bin icon, with Undo).
+ * edit (tap a row) and delete (swipe a row, or the bin icon after confirming).
+ * Deletes can be undone from the snackbar.
  */
 public class PantryFragment extends Fragment implements PantryAdapter.OnPantryItemListener {
 
@@ -42,6 +46,13 @@ public class PantryFragment extends Fragment implements PantryAdapter.OnPantryIt
     /** Local copy of what the list currently shows. */
     private final List<PantryItem> items = new ArrayList<>();
 
+    /**
+     * Incremented for every load. A response is only used if it belongs to the
+     * latest load, so a slow old response can never overwrite newer data.
+     */
+    private int loadGeneration;
+
+    private SettingsManager settings;
     private PantryAdapter adapter;
     private RecyclerView recycler;
     private View progress;
@@ -60,6 +71,7 @@ public class PantryFragment extends Fragment implements PantryAdapter.OnPantryIt
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        settings = new SettingsManager(requireContext());
         recycler = view.findViewById(R.id.recycler_pantry);
         progress = view.findViewById(R.id.progress_pantry);
         emptyLayout = view.findViewById(R.id.layout_empty_pantry);
@@ -83,19 +95,33 @@ public class PantryFragment extends Fragment implements PantryAdapter.OnPantryIt
     @Override
     public void onResume() {
         super.onResume();
+        adapter.setAlertDays(settings.getAlertDays()); // Settings may have changed
         loadItems();
+    }
+
+    /** Release view references so a destroyed screen can be garbage collected. */
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        recycler = null;
+        adapter = null;
+        progress = null;
+        emptyLayout = null;
+        errorLayout = null;
+        errorMessage = null;
     }
 
     // loading
 
     private void loadItems() {
+        final int generation = ++loadGeneration;
         if (items.isEmpty()) {
             showLoading();
         }
         repository.getPantryItems(new ResultCallback<List<PantryItem>>() {
             @Override
             public void onSuccess(List<PantryItem> result) {
-                if (!isViewAlive()) return;
+                if (!isViewAlive() || generation != loadGeneration) return;
                 items.clear();
                 items.addAll(result);
                 showItems();
@@ -103,11 +129,13 @@ public class PantryFragment extends Fragment implements PantryAdapter.OnPantryIt
 
             @Override
             public void onError(String message) {
-                if (!isViewAlive()) return;
+                if (!isViewAlive() || generation != loadGeneration) return;
                 if (items.isEmpty()) {
                     showError(message);
                 } else {
-                    Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG).show();
+                    Snackbar.make(requireView(), message, Snackbar.LENGTH_LONG)
+                            .setAction(R.string.action_retry, v -> loadItems())
+                            .show();
                 }
             }
         });
@@ -115,7 +143,7 @@ public class PantryFragment extends Fragment implements PantryAdapter.OnPantryIt
 
     /** Callbacks can arrive after the user left the screen; never touch dead views. */
     private boolean isViewAlive() {
-        return isAdded() && getView() != null;
+        return isAdded() && getView() != null && recycler != null;
     }
 
     // screen state
@@ -151,7 +179,7 @@ public class PantryFragment extends Fragment implements PantryAdapter.OnPantryIt
      * If the server call fails the list is reloaded so the row comes back.
      */
     private void deleteItem(PantryItem item) {
-        items.remove(item);
+        removeLocally(item.getId());
         showItems();
 
         repository.deletePantryItem(item.getId(), new ResultCallback<Void>() {
@@ -174,7 +202,15 @@ public class PantryFragment extends Fragment implements PantryAdapter.OnPantryIt
         });
     }
 
-    /** Undo: the item is created again (it receives a new id) */
+    private void removeLocally(long id) {
+        for (Iterator<PantryItem> it = items.iterator(); it.hasNext(); ) {
+            if (it.next().getId() == id) {
+                it.remove();
+            }
+        }
+    }
+
+    /** Undo: the item is created again (it receives a new id). */
     private void restoreItem(PantryItem item) {
         repository.addPantryItem(item, new ResultCallback<PantryItem>() {
             @Override
@@ -209,6 +245,7 @@ public class PantryFragment extends Fragment implements PantryAdapter.OnPantryIt
             public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
                 int position = viewHolder.getBindingAdapterPosition();
                 if (position != RecyclerView.NO_POSITION) {
+                    // A swipe is deliberate and Undo is offered, so no dialog here
                     deleteItem(adapter.getItemAt(position));
                 }
             }
@@ -245,8 +282,14 @@ public class PantryFragment extends Fragment implements PantryAdapter.OnPantryIt
         startActivity(intent);
     }
 
+    /** The bin icon is easy to tap by accident, so it asks for confirmation first. */
     @Override
     public void onDeleteClick(PantryItem item) {
-        deleteItem(item);
+        new MaterialAlertDialogBuilder(requireContext())
+                .setTitle(getString(R.string.dialog_delete_title, item.getName()))
+                .setMessage(R.string.dialog_delete_message)
+                .setPositiveButton(R.string.dialog_delete, (dialog, which) -> deleteItem(item))
+                .setNegativeButton(R.string.action_cancel, null)
+                .show();
     }
 }

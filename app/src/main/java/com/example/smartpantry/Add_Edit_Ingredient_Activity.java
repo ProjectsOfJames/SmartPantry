@@ -11,6 +11,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 
@@ -22,6 +23,7 @@ import com.example.smartpantry.util.FormatUtils;
 import com.example.smartpantry.util.IntentKeys;
 import com.example.smartpantry.util.SettingsManager;
 import com.google.android.material.button.MaterialButton;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -33,9 +35,9 @@ import java.util.Locale;
 /**
  * The Add/Edit Ingredient screen.
  *
- * Add mode:  launched with no extras, saves with a Create call
+ * Add mode:  launched with no extras, saves with a Create call.
  * Edit mode: launched with a PantryItem under IntentKeys.EXTRA_PANTRY_ITEM,
- *            the form is pre-filled and saves with an Update call
+ *            the form is pre-filled and saves with an Update call.
  */
 public class Add_Edit_Ingredient_Activity extends AppCompatActivity {
 
@@ -70,11 +72,20 @@ public class Add_Edit_Ingredient_Activity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar_add_edit);
         toolbar.setTitle(editingItem == null
                 ? R.string.title_add_ingredient : R.string.title_edit_ingredient);
-        toolbar.setNavigationOnClickListener(v -> finish());
+        toolbar.setNavigationOnClickListener(v -> confirmDiscardOrFinish());
 
         setUpListeners();
 
-        // Only fill the form on first creation
+        // The system back button gets the same "discard changes?" check
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                confirmDiscardOrFinish();
+            }
+        });
+
+        // Only fill the form on first creation. After a rotation Android has
+        // already restored whatever the user had typed.
         if (savedInstanceState == null) {
             if (editingItem != null) {
                 populateForm(editingItem);
@@ -100,7 +111,7 @@ public class Add_Edit_Ingredient_Activity extends AppCompatActivity {
 
     private void setUpListeners() {
         btnSave.setOnClickListener(v -> attemptSave());
-        btnCancel.setOnClickListener(v -> finish());
+        btnCancel.setOnClickListener(v -> confirmDiscardOrFinish());
 
         // Expiry date: tap the field or its calendar icon to pick, button to clear
         etExpiry.setOnClickListener(v -> showDatePicker());
@@ -176,6 +187,51 @@ public class Add_Edit_Ingredient_Activity extends AppCompatActivity {
     /** month is zero-based, as DatePickerDialog supplies it. Returns "yyyy-MM-dd" */
     private static String formatDate(int year, int month, int day) {
         return String.format(Locale.US, "%04d-%02d-%02d", year, month + 1, day);
+    }
+
+    // Unsaved changes
+
+    /** Leaving with edits would lose them, so ask first. Ignored while a save is running. */
+    private void confirmDiscardOrFinish() {
+        if (!btnSave.isEnabled()) {
+            return; // a save is in progress
+        }
+        if (!hasUnsavedChanges()) {
+            finish();
+            return;
+        }
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.dialog_discard_title)
+                .setMessage(R.string.dialog_discard_message)
+                .setPositiveButton(R.string.dialog_discard, (dialog, which) -> finish())
+                .setNegativeButton(R.string.dialog_keep_editing, null)
+                .show();
+    }
+
+    /**
+     * Add mode: anything typed counts. Edit mode: anything different from the
+     * item that was opened counts.
+     */
+    private boolean hasUnsavedChanges() {
+        String name = textOf(etName).replaceAll("\\s+", " ");
+        String quantityText = textOf(etQuantity);
+        String expiry = textOf(etExpiry);
+
+        if (editingItem == null) {
+            return !name.isEmpty() || !quantityText.isEmpty() || !expiry.isEmpty();
+        }
+
+        Double quantity = FormatUtils.parseQuantity(quantityText);
+        boolean sameQuantity = quantity != null
+                && Double.compare(FormatUtils.roundToTwoDecimals(quantity), editingItem.getQuantity()) == 0;
+        boolean sameUnit = spinnerUnit.getSelectedItem().toString()
+                .equalsIgnoreCase(editingItem.getUnit());
+        String originalExpiry = editingItem.getExpiryDate() == null ? "" : editingItem.getExpiryDate();
+
+        return !name.equals(editingItem.getName())
+                || !sameQuantity
+                || !sameUnit
+                || !expiry.equals(originalExpiry);
     }
 
     // Validation

@@ -98,4 +98,26 @@
     <string name="expiry_status_tomorrow">expires tomorrow</string>
     <string name="expiry_status_days">expires in %1$d days</string>
 
+    <!-- Expiry highlighting on the pantry list -->
+    <string name="expiry_line_expired">Expired: %1$s</string>
+    <string name="expiry_line_soon">Expires: %1$s (%2$s)</string>
+    <string name="when_today">today</string>
+    <string name="when_tomorrow">tomorrow</string>
+    <string name="when_in_days">in %1$d days</string>
+
+    <!-- Confirmation dialogs -->
+    <string name="dialog_delete_title">Delete %1$s?</string>
+    <string name="dialog_delete_message">This removes it from your pantry.</string>
+    <string name="dialog_delete">Delete</string>
+    <string name="dialog_discard_title">Discard changes?</string>
+    <string name="dialog_discard_message">Your edits have not been saved.</string>
+    <string name="dialog_discard">Discard</string>
+    <string name="dialog_keep_editing">Keep editing</string>
+
+    <!-- Banner on the Suggested Recipes screen -->
+    <plurals name="recipes_match_plural">
+        <item quantity="one">%d recipe you can make right now</item>
+        <item quantity="other">%d recipes you can make right now</item>
+    </plurals>
+
 </resources>
